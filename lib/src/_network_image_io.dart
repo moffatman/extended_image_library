@@ -227,6 +227,9 @@ class ExtendedNetworkImageProvider
       final Uri resolved = Uri.base.resolve(key.url);
       final HttpClientResponse? response = await _tryGetResponse(resolved);
       if (response == null || response.statusCode != HttpStatus.ok) {
+        if (response != null) {
+          response.drain<List<int>>(<int>[]);
+        }
         return null;
       }
 
