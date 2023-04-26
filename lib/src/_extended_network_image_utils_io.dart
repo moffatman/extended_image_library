@@ -41,43 +41,24 @@ Future<bool> clearDiskCachedImage(String url, {String? cacheKey}) async {
   return true;
 }
 
+String? lastTemporaryDirectory;
+
 /// Get the local file of the cached image
 
 Future<File?> getCachedImageFile(String url, {String? cacheKey}) async {
   try {
     final String key = cacheKey ?? keyToMd5(url);
-    final Directory cacheImagesDirectory = Directory(
-        join((await getTemporaryDirectory()).path, cacheImageFolderName));
-    if (cacheImagesDirectory.existsSync()) {
-      await for (final FileSystemEntity file in cacheImagesDirectory.list()) {
-        if (file.path.endsWith(key)) {
-          return File(file.path);
-        }
-      }
-    }
+    lastTemporaryDirectory ??= (await getTemporaryDirectory()).path;
+    final File file = File(join(lastTemporaryDirectory!, cacheImageFolderName, key));
+    return file.existsSync() ? file : null;
   } catch (_) {
     return null;
   }
-  return null;
 }
 
 /// Check if the image exists in cache
 Future<bool> cachedImageExists(String url, {String? cacheKey}) async {
-  try {
-    final String key = cacheKey ?? keyToMd5(url);
-    final Directory cacheImagesDirectory = Directory(
-        join((await getTemporaryDirectory()).path, cacheImageFolderName));
-    if (cacheImagesDirectory.existsSync()) {
-      await for (final FileSystemEntity file in cacheImagesDirectory.list()) {
-        if (file.path.endsWith(key)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  } catch (e) {
-    return false;
-  }
+  return (await getCachedImageFile(url, cacheKey: cacheKey)) != null;
 }
 
 /// Get total size of cached image
