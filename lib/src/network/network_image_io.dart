@@ -153,7 +153,7 @@ class ExtendedNetworkImageProvider
 
     if (result == null) {
       try {
-        final Uint8List? data = await _loadNetwork(
+        final Uint8List? data = await loadNetwork(
           key,
           chunkEvents,
         );
@@ -208,7 +208,7 @@ class ExtendedNetworkImageProvider
     }
     // load from network
     if (data == null) {
-      data = await _loadNetwork(
+      data = await loadNetwork(
         key,
         chunkEvents,
       );
@@ -222,7 +222,7 @@ class ExtendedNetworkImageProvider
   }
 
   /// Get the image from network.
-  Future<Uint8List?> _loadNetwork(
+  Future<Uint8List?> loadNetwork(
     ExtendedNetworkImageProvider key,
     StreamController<ImageChunkEvent>? chunkEvents,
   ) async {
@@ -366,7 +366,7 @@ class ExtendedNetworkImageProvider
       );
     }
 
-    return await _loadNetwork(
+    return await loadNetwork(
       this,
       chunkEvents,
     );
