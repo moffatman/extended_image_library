@@ -11,6 +11,8 @@ import 'package:path_provider/path_provider.dart';
 
 import 'extended_network_image_provider.dart' as image_provider;
 
+Directory? _cacheImagesDirectory;
+
 class ExtendedNetworkImageProvider
     extends ImageProvider<image_provider.ExtendedNetworkImageProvider>
     with ExtendedImageProvider<image_provider.ExtendedNetworkImageProvider>
@@ -182,29 +184,32 @@ class ExtendedNetworkImageProvider
     StreamController<ImageChunkEvent>? chunkEvents,
     String md5Key,
   ) async {
-    final Directory _cacheImagesDirectory = Directory(
-        join((await getTemporaryDirectory()).path, cacheImageFolderName));
+    Directory directory;
+    if (_cacheImagesDirectory case final Directory d) {
+      // Directory must exist
+      directory = d;
+    }
+    else {
+      directory = _cacheImagesDirectory = Directory(join((await getTemporaryDirectory()).path, cacheImageFolderName));
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+    }
     Uint8List? data;
     // exist, try to find cache image file
-    if (_cacheImagesDirectory.existsSync()) {
-      final File cacheFlie = File(join(_cacheImagesDirectory.path, md5Key));
-      if (cacheFlie.existsSync()) {
-        if (key.cacheMaxAge != null) {
-          final DateTime now = DateTime.now();
-          final FileStat fs = cacheFlie.statSync();
-          if (now.subtract(key.cacheMaxAge!).isAfter(fs.changed)) {
-            cacheFlie.deleteSync(recursive: true);
-          } else {
-            data = await cacheFlie.readAsBytes();
-          }
+    final File cacheFlie = File(join(directory.path, md5Key));
+    if (cacheFlie.existsSync()) {
+      if (key.cacheMaxAge != null) {
+        final DateTime now = DateTime.now();
+        final FileStat fs = cacheFlie.statSync();
+        if (now.subtract(key.cacheMaxAge!).isAfter(fs.changed)) {
+          cacheFlie.deleteSync(recursive: true);
         } else {
           data = await cacheFlie.readAsBytes();
         }
+      } else {
+        data = await cacheFlie.readAsBytes();
       }
-    }
-    // create folder
-    else {
-      await _cacheImagesDirectory.create();
     }
     // load from network
     if (data == null) {
@@ -214,7 +219,8 @@ class ExtendedNetworkImageProvider
       );
       if (data != null) {
         // cache image file
-        await File(join(_cacheImagesDirectory.path, md5Key)).writeAsBytes(data);
+        await cacheFlie.create(recursive: true);
+        await cacheFlie.writeAsBytes(data);
       }
     }
 
