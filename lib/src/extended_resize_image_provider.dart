@@ -392,4 +392,14 @@ class _SizeAwareCacheKey {
         cacheRawData,
         imageCacheName,
       );
+  
+  @override
+  String toString() => '_SizeAwareCacheKey($_providerCacheKey, ${<(String, Object?)>[
+    ('maxBytes', maxBytes),
+    ('compressionRatio', compressionRatio),
+    ('_width', _width),
+    ('_height', _height),
+    ('cacheRawData', cacheRawData),
+    ('imageCacheName', imageCacheName)
+  ].where((x) => x.$2 != null).map((x) => '${x.$1}: ${x.$2}').join(', ')})';
 }
