@@ -137,35 +137,22 @@ class ExtendedNetworkImageProvider
     final String md5Key = cacheKey ?? keyToMd5(key.url);
     ui.Codec? result;
     if (cache) {
-      try {
-        final Uint8List? data = await _loadCache(
-          key,
-          chunkEvents,
-          md5Key,
-        );
-        if (data != null) {
-          result = await instantiateImageCodec(data, decode);
-        }
-      } catch (e) {
-        if (printError) {
-          print(e);
-        }
+      final Uint8List? data = await _loadCache(
+        key,
+        chunkEvents,
+        md5Key,
+      );
+      if (data != null) {
+        result = await instantiateImageCodec(data, decode);
       }
     }
-
-    if (result == null) {
-      try {
-        final Uint8List? data = await loadNetwork(
-          key,
-          chunkEvents,
-        );
-        if (data != null) {
-          result = await instantiateImageCodec(data, decode);
-        }
-      } catch (e) {
-        if (printError) {
-          print(e);
-        }
+    else {
+      final Uint8List? data = await loadNetwork(
+        key,
+        chunkEvents,
+      );
+      if (data != null) {
+        result = await instantiateImageCodec(data, decode);
       }
     }
 
