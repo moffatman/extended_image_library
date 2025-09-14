@@ -128,6 +128,11 @@ class ExtendedNetworkImageProvider
     return SynchronousFuture<ExtendedNetworkImageProvider>(this);
   }
 
+  @mustCallSuper
+  void didWriteCache() {
+
+  }
+
   Future<ui.Codec> _loadAsync(
     ExtendedNetworkImageProvider key,
     StreamController<ImageChunkEvent> chunkEvents,
@@ -208,6 +213,7 @@ class ExtendedNetworkImageProvider
         // cache image file
         await cacheFlie.create(recursive: true);
         await cacheFlie.writeAsBytes(data);
+        didWriteCache();
       }
     }
 
